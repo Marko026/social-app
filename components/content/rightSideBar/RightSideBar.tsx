@@ -83,6 +83,7 @@ const RightSideBar = ({
         <div className="flex flex-col">
           {getAuthorDetails.user?.contents.map((content) => (
             <Link
+              key={content.id}
               href={`/content/${content.id}`}
               className="flex-between items-center gap-3.5  hover:bg-white-300/30 hover:dark:bg-black-700 p-3 rounded-lg">
               <div className="flex items-center gap-3.5">

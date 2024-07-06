@@ -12,6 +12,7 @@ import type { ITag } from '@/types/content';
 import { calculateTimeAgo, formatNumberWithCommas } from '@/utils/format';
 
 import parse from 'html-react-parser';
+import { revalidatePath } from 'next/cache';
 
 // ----------------------------------------------------------------
 
@@ -47,12 +48,16 @@ const PostItemCard: React.FC<IPostItemCardProps> = ({
   handleLikeContent,
   author,
 }) => {
+  const handleRevalidate = () => {
+    revalidatePath(`/content/${id}`);
+  };
+
   return (
     <li>
       <Link
+        onClick={handleRevalidate}
         href={'/content/' + id}
-        className="bg-light100__dark800 flex gap-4 rounded-2xl p-4 md:items-center md:p-5 shadow-card"
-      >
+        className="bg-light100__dark800 flex gap-4 rounded-2xl p-4 md:items-center md:p-5 shadow-card">
         <Image
           src={coverImage || '/assets/icons/image-preview.svg'}
           width={165}
@@ -81,8 +86,7 @@ const PostItemCard: React.FC<IPostItemCardProps> = ({
             <Button
               type="button"
               className="flex-center bg-white-200 dark:bg-black-700 size-[30px] shrink-0 rounded-full"
-              onClick={(e) => handleLikeContent(e, id)}
-            >
+              onClick={(e) => handleLikeContent(e, id)}>
               <HeartIcon
                 className={isLiked ? 'text-primary-500' : 'text-white-300'}
               />

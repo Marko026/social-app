@@ -43,6 +43,8 @@ const ContentDetails = ({
 }: ContentDetailsProps) => {
   const router = useRouter();
 
+  console.log(allComments);
+
   return (
     <div className="main-content p1-bold w-full mx-auto md:mx-0  space-y-5">
       {content?.type === EContentType.PODCAST && (

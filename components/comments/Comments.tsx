@@ -116,8 +116,7 @@ const Comments = ({
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-8 w-full"
-          >
+            className="space-y-8 w-full">
             <RHFInput
               className="bg-white-200"
               name="text"
@@ -135,7 +134,7 @@ const Comments = ({
       </div>
 
       {allComments.map((comment) => (
-        <>
+        <div key={comment.id}>
           {editComment === comment.id ? (
             <RCommentForm
               comment={comment}
@@ -182,8 +181,7 @@ const Comments = ({
                   <div className="flex items-center gap-2 md:gap-4  sm:mt-0">
                     <div
                       className="flex gap-1 items-center cursor-pointer"
-                      onClick={() => setReplyingComment(comment.id)}
-                    >
+                      onClick={() => setReplyingComment(comment.id)}>
                       <Image
                         src="/assets/icons/reply.svg"
                         width={16}
@@ -223,20 +221,17 @@ const Comments = ({
                           sideOffset={8}
                           align="end"
                           onCloseAutoFocus={(e) => e.preventDefault()}
-                          className="bg-black-900 border border-black-700/40 !w-48 px-5 shadow-header-menu data-[side=bottom]:animate-slideUpAndFade data-[side=left]:animate-slideRightAndFade data-[side=right]:animate-slideLeftAndFade data-[side=top]:animate-slideDownAndFade z-20 mb-4 flex flex-col gap-2.5 rounded-[10px] py-4"
-                        >
+                          className="bg-black-900 border border-black-700/40 !w-48 px-5 shadow-header-menu data-[side=bottom]:animate-slideUpAndFade data-[side=left]:animate-slideRightAndFade data-[side=right]:animate-slideLeftAndFade data-[side=top]:animate-slideDownAndFade z-20 mb-4 flex flex-col gap-2.5 rounded-[10px] py-4">
                           <Item
                             onClick={() => setEditComment(comment.id)}
-                            className="flex items-center gap-2.5 p2-medium cursor-pointer"
-                          >
+                            className="flex items-center gap-2.5 p2-medium cursor-pointer">
                             <EditIcon size={16} />
                             <p>Edit Comment</p>
                           </Item>
                           <Item
                             onClick={() => onDelete(comment.id)}
                             onSelect={(e) => e.preventDefault()}
-                            className="flex items-center gap-2.5 p2-medium !text-[#FF584D] cursor-pointer"
-                          >
+                            className="flex items-center gap-2.5 p2-medium !text-[#FF584D] cursor-pointer">
                             <Image
                               src="/assets/icons/trash.svg"
                               width={16}
@@ -297,7 +292,7 @@ const Comments = ({
               setOpenReply={() => setReplyingComment(null)}
             />
           )}
-        </>
+        </div>
       ))}
     </div>
   );

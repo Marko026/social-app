@@ -22,7 +22,6 @@ type UserProps = {
 const Content = async (props: ParamsProps) => {
   const { id } = props.params;
   const session = await auth();
-
   if (!session) throw new Error('User data not available!');
 
   if (!id) throw new Error('No id provided');
