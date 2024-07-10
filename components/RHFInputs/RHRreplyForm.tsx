@@ -1,6 +1,6 @@
 import { Form } from '@/components/ui/form';
 import { revalidateRoute } from '@/lib/actions/revalidate';
-import { IComment, editAndReplyCommentSchema } from '@/lib/validation';
+import { editDeleteReplyCommentSchema, IComment } from '@/lib/validation';
 import { typedFetch } from '@/utils/api';
 import { formatDate } from '@/utils/format';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -12,32 +12,57 @@ import { Button } from '../ui/button';
 import RHFInput from './RHFInput';
 
 type CommentProps = {
-  isEdit: boolean;
   comment: IComment;
+  isEdit: boolean;
+  reply: {
+    id: string;
+    text: string;
+  };
   setOpenEdit: (value: boolean) => void;
   setOpenReply: (value: boolean) => void;
-  isReplying: boolean;
 };
 
-const RCommentForm = ({
+const RHRreplyForm = ({
+  comment,
   isEdit,
   setOpenEdit,
   setOpenReply,
-  isReplying,
-  comment,
+  reply,
 }: CommentProps) => {
   const session = useSession();
-  const form = useForm<z.infer<typeof editAndReplyCommentSchema>>({
-    resolver: zodResolver(editAndReplyCommentSchema),
+  const form = useForm<z.infer<typeof editDeleteReplyCommentSchema>>({
+    resolver: zodResolver(editDeleteReplyCommentSchema),
     defaultValues: {
-      text: isReplying ? '' : comment?.text ?? '',
+      id: reply.id ?? '',
+      text: isEdit ? reply.text : '',
     },
   });
 
   const onSubmit = async (
-    values: z.infer<typeof editAndReplyCommentSchema>
+    values: z.infer<typeof editDeleteReplyCommentSchema>
   ) => {
-    if (isReplying) {
+    if (isEdit) {
+      try {
+        await typedFetch({
+          url: `/content/comment/update`,
+          method: 'PATCH',
+          body: {
+            id: comment.id,
+            replyId: reply.id,
+            text: comment.text,
+            textReply: values.text,
+            contentId: comment.contentId,
+            authorId: comment.authorId,
+          },
+        });
+
+        setOpenEdit(false);
+        revalidateRoute(`/content/comment/${comment.id}`);
+      } catch (error) {
+        console.error(error);
+        throw new Error('Failed to edit comment');
+      }
+    } else {
       try {
         await typedFetch({
           url: '/content/comment',
@@ -56,26 +81,6 @@ const RCommentForm = ({
         console.error(error);
         throw new Error('Failed to reply to comment');
       }
-    } else {
-      try {
-        await typedFetch({
-          url: '/content/comment/update',
-          method: 'PATCH',
-          body: {
-            id: comment.id,
-            contentId: comment.contentId,
-            text: values.text,
-            authorId: comment.authorId,
-          },
-        });
-        setOpenEdit(false);
-        revalidateRoute(`/content/comment/${comment.contentId}`);
-      } catch (error) {
-        console.error(error);
-        throw new Error('Failed to update comment');
-      }
-
-      form.reset();
     }
   };
 
@@ -111,12 +116,9 @@ const RCommentForm = ({
               name="text"
               onChange={(e) => form.setValue('text', e.target.value)}
               className="bg-white-200 dark:bg-black-900 md:h-20 "
-              placeholder={isEdit ? 'Edit your comment' : 'Reply to comment'}
             />
             <div className=" w-1/2 ml-auto flex  justify-end">
               <Button
-                type="button"
-                onSelect={(e) => e.preventDefault()}
                 onClick={() => {
                   if (isEdit) {
                     setOpenEdit(false);
@@ -124,6 +126,7 @@ const RCommentForm = ({
                     setOpenReply(false);
                   }
                 }}
+                type="button"
                 className="!text-white-400 w-1/3 md:w-1/4 !text-[14px] capitalize cursor-pointer p3-medium">
                 Cancel
               </Button>
@@ -131,7 +134,7 @@ const RCommentForm = ({
               <Button
                 type="submit"
                 className="!text-primary-500  w-1/3 md:w-1/4  !text-[14px]  capitalize cursor-pointer p3-medium">
-                {isEdit ? 'Save' : 'Reply'}
+                Save
               </Button>
             </div>
           </div>
@@ -141,4 +144,4 @@ const RCommentForm = ({
   );
 };
 
-export default RCommentForm;
+export default RHRreplyForm;

@@ -11,8 +11,8 @@ import Link from 'next/link';
 import type { ITag } from '@/types/content';
 import { calculateTimeAgo, formatNumberWithCommas } from '@/utils/format';
 
+import { revalidateRoute } from '@/lib/actions/revalidate';
 import parse from 'html-react-parser';
-import { revalidatePath } from 'next/cache';
 
 // ----------------------------------------------------------------
 
@@ -48,14 +48,10 @@ const PostItemCard: React.FC<IPostItemCardProps> = ({
   handleLikeContent,
   author,
 }) => {
-  const handleRevalidate = () => {
-    revalidatePath(`/content/${id}`);
-  };
-
   return (
     <li>
       <Link
-        onClick={handleRevalidate}
+        onClick={() => revalidateRoute('/content/' + id)}
         href={'/content/' + id}
         className="bg-light100__dark800 flex gap-4 rounded-2xl p-4 md:items-center md:p-5 shadow-card">
         <Image

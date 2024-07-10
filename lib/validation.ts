@@ -241,4 +241,9 @@ export const editAndReplyCommentSchema = z.object({
   text: z.string().min(2).max(1000),
 });
 
+export const editDeleteReplyCommentSchema = z.object({
+  id: z.string(),
+  text: z.string().min(2).max(1000),
+});
+
 export type IComment = z.infer<typeof baseCommentSchema>;

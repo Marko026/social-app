@@ -22,6 +22,7 @@ import {
 import { EditIcon } from 'lucide-react';
 import { useState } from 'react';
 import RCommentForm from '../RHFInputs/RCommentForm';
+import RHRreplyForm from '../RHFInputs/RHRreplyForm';
 
 type AllCommentProps = {
   allComments: IComment[];
@@ -35,6 +36,7 @@ const Comments = ({
   contentId,
 }: AllCommentProps) => {
   const [editComment, setEditComment] = useState<string | null>(null);
+  const [editReply, setEditReply] = useState<string | null>(null);
   const [replyingComment, setReplyingComment] = useState<string | null>(null);
 
   const form = useForm<z.infer<typeof commentFormSchema>>({
@@ -96,6 +98,24 @@ const Comments = ({
     } catch (error) {
       console.error(error);
       throw new Error('Failed to like comment');
+    }
+  };
+
+  const deleteReply = async (replyId: string, commentId: string) => {
+    try {
+      await typedFetch({
+        url: '/content/comment/reply/delete',
+        method: 'DELETE',
+        body: {
+          id: replyId,
+          commentId: commentId,
+          contentId,
+        },
+      });
+      revalidateRoute('/content/comment');
+    } catch (error) {
+      console.error(error);
+      throw new Error('Failed to delete reply comment');
     }
   };
 
@@ -252,37 +272,64 @@ const Comments = ({
                 {comment.replies && (
                   <div className="!w-full space-y-2 !mt-0 text-[11px] p-2 rounded-lg text-wrap break-words overflow-wrap break-word overflow-hidden">
                     {comment.replies.map((reply, idx) => (
-                      <div key={idx + 1}>
-                        <div className="flex items-center">
-                          <div className="flex gap-1">
-                            <Image
-                              src={
-                                reply.author.avatarImg ||
-                                '/assets/images/avatars/avatar-1.svg'
-                              }
-                              width={20}
-                              height={20}
-                              alt="avatar"
-                              className="rounded-full"
-                            />
-                            {reply.author.userName}
+                      <>
+                        {editReply === reply.id ? (
+                          <RHRreplyForm
+                            comment={comment}
+                            reply={reply}
+                            isEdit={true}
+                            setOpenEdit={() => setEditReply(null)}
+                            setOpenReply={() => setReplyingComment(null)}
+                          />
+                        ) : (
+                          <div key={idx + 1}>
+                            <div className="flex items-center">
+                              <div className="flex gap-1">
+                                <Image
+                                  src={
+                                    reply.author.avatarImg ||
+                                    '/assets/images/avatars/avatar-1.svg'
+                                  }
+                                  width={20}
+                                  height={20}
+                                  alt="avatar"
+                                  className="rounded-full"
+                                />
+                                {reply.author.userName}
 
-                            <p className="ml-1">
-                              {formatDate(reply.createdAt)}
+                                <p className="ml-1">
+                                  {formatDate(reply.createdAt)}
+                                </p>
+                              </div>
+                            </div>
+                            <p className="ml-7 text-white-400 font-semibold">
+                              {reply.text.charAt(0).toUpperCase() +
+                                reply.text.slice(1)}
                             </p>
+                            <div className="space-x-1">
+                              <span
+                                onClick={() => setEditReply(reply.id)}
+                                className="text-white-500 px-2 py-0.5 bg-light100__dark800 hover:bg-white-300 cursor-pointer rounded-lg">
+                                Edit
+                              </span>
+                              <span
+                                onClick={() =>
+                                  deleteReply(reply.id, comment.id)
+                                }
+                                className="text-white-500 px-2 py-0.5 bg-light100__dark800 hover:bg-white-300 cursor-pointer rounded-lg">
+                                Delete
+                              </span>
+                            </div>
                           </div>
-                        </div>
-                        <p className="ml-7 text-white-400 font-semibold">
-                          {reply.text.charAt(0).toUpperCase() +
-                            reply.text.slice(1)}
-                        </p>
-                      </div>
+                        )}
+                      </>
                     ))}
                   </div>
                 )}
               </div>
             </div>
           )}
+
           {replyingComment === comment.id && (
             <RCommentForm
               comment={comment}

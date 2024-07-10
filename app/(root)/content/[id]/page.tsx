@@ -8,6 +8,8 @@ import { IProfileUser } from '@/types/user';
 import { typedFetch } from '@/utils/api';
 import { getFirstName } from '@/utils/format';
 
+export const revalidate = 0;
+
 type ParamsProps = {
   params: {
     id: string;
@@ -28,7 +30,7 @@ const Content = async (props: ParamsProps) => {
 
   const contentDetails = await typedFetch<IContent>({
     url: `/content/${id}`,
-    cache: 'no-cache',
+    cache: 'no-store',
   });
 
   const getAuthorDetails = await typedFetch<UserProps>({
